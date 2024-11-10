@@ -2,29 +2,26 @@
   <el-row style="background-color: #FFFFFF;padding: 10px 0;border-radius: 5px;">
     <el-row style="padding: 10px 0 20px;border-bottom: 1px solid #f1f1f1;margin: 0 10px;">
       <el-row>
-        <span class="top-bar">咨询标题</span>
-        <el-input size="small" style="width: 188px;" v-model="newsQueryDto.name" placeholder="输入处" clearable
+        <span class="top-bar">健康模型标题</span>
+        <el-input size="small" style="width: 188px;" v-model="healthModelConfigQueryDto.name" placeholder="输入处" clearable
                   @clear="handleFilterClear">
         </el-input>
-        <span class="top-bar" >分类</span>
-        <el-select size="small" v-model="newsQueryDto.tagId" placeholder="请选择">
-          <el-option
-              v-for="tag in tagsList"
-              :key="tag.id"
-              :label="tag.name"
-              :value="tag.id">
-          </el-option>
-        </el-select>
+        <span class="top-bar">模型简介</span>
+        <el-input size="small" style="width: 188px;" v-model="healthModelConfigQueryDto.detail" placeholder="输入处" clearable
+                  @clear="handleFilterClear">
+        </el-input>
+        <span class="top-bar">模型单位</span>
+        <el-input size="small" style="width: 188px;" v-model="healthModelConfigQueryDto.unit" placeholder="输入处" clearable
+                  @clear="handleFilterClear">
+        </el-input>
+        <span class="top-bar">模型符号</span>
+        <el-input size="small" style="width: 188px;" v-model="healthModelConfigQueryDto.symbol" placeholder="输入处" clearable
+                  @clear="handleFilterClear">
+        </el-input>
         <span class="top-bar">注册时间</span>
         <el-date-picker size="small" style="margin-left: 10px;width: 220px;" v-model="searchTime"
                         type="daterange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间">
         </el-date-picker>
-        <span class="top-bar">是否推荐</span>
-        <el-switch
-            v-model="newsQueryDto.isTop"
-            active-color="#13ce66"
-            inactive-color="#ff4949">
-        </el-switch>
         <el-button size="small" class="customer"
                    style="margin-left: 20px;background-color: rgb(43, 121, 203);border: none;" type="primary"
                    @click="handleFilter">立即查询</el-button>
@@ -32,7 +29,7 @@
                    style="background-color: #f1f1f1;border: none;color: #909399;border: 1px solid #f1f1f1;" type="info"
                    @click="resetQueryCondition">条件重置</el-button>
         <el-button size="small" style="background-color: rgb(43, 121, 203);border: none;" class="customer"
-                   type="info" @click="add()">新增咨询</el-button>
+                   type="info" @click="add()">新增健康模型</el-button>
         <el-button size="small" class="customer"
                    :style="{ marginLeft: '10px', backgroundColor: selectedRows.length ? '#a7535a' : '#F1F1F1', border: 'none', color: selectedRows.length ? '#FFFFFF' : '#909399' }"
                    type="danger" @click="batchDelete()">批量删除</el-button>
@@ -40,21 +37,16 @@
     </el-row>
     <el-row style="margin: 10px;">
       <el-table row-key="id" @selection-change="handleSelectionChange" :data="tableData" style="width: 100%">
-        <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column prop="name" width="188" label="咨询名"></el-table-column>
         <el-table-column prop="cover" width="138" label="封面">
           <template slot-scope="scope">
             <img :src="scope.row.cover" style="width: 88px;height: 54px;border-radius: 5px;"/>
           </template>
         </el-table-column>
-        <el-table-column prop="name" width="218" label="资讯名"></el-table-column>
-        <el-table-column prop="tagName" width="88" label="标签"></el-table-column>
-        <el-table-column prop="isTop" width="148" label="是否推荐">
-          <template slot-scope="scope">
-            <span>{{ scope.row.isTop ? '已经推荐' : '未推荐' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" width="168" label="发布时间"></el-table-column>
+        <el-table-column prop="name" width="218" label="健康模型名"></el-table-column>
+        <el-table-column prop="detail" width="188" label="模型简介"></el-table-column>
+        <el-table-column prop="valueRange" width="150" label="值范围"></el-table-column>
+        <el-table-column prop="unit" width="88" label="模型单位"></el-table-column>
+        <el-table-column prop="symbol" width="88" label="模型符号"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <span class="text-button" @click="handleEdit(scope.row)">编辑</span>
@@ -68,14 +60,11 @@
     </el-row>
     <el-dialog :show-close="false" :visible.sync="dialogUserOperaion" width="50%">
       <div slot="title">
-        <p class="dialog-title">{{ !isOperation ? '新增新咨询' : '编辑咨询信息' }}</p>
+        <p class="dialog-title">{{ !isOperation ? '新增新健康模型' : '编辑健康模型信息' }}</p>
       </div>
       <div style="padding:0 20px;">
-        <el-row style="margin: 12px 0px">
-          <span class="dialog-hover">标题</span>
-          <input class="dialog-input" v-model="data.name" placeholder="标题名" />
-        </el-row>
         <el-row>
+          <span class="dialog-hover">图标</span>
           <el-upload class="avatar-uploader" action="/api/personal-heath/v1.0/file/upload"
                      :show-file-list="false" :on-success="handleAvatarSuccess">
             <img v-if="data.cover" :src="data.cover" class="dialog-avatar">
@@ -83,26 +72,61 @@
           </el-upload>
         </el-row>
         <el-row style="margin: 12px 0px">
-
-          <el-row>
-            <span class="dialog-hover">分类</span>
-          </el-row>
-          <el-radio-group v-model="data.tagId">
-            <el-radio :key="index" :label="tag.id" v-for="(tag,index) in tagsList">{{tag.name}}</el-radio>
-          </el-radio-group>
+          <span class="dialog-hover">模型名</span>
+          <input class="dialog-input" v-model="data.name" placeholder="模型名" />
         </el-row>
-
         <el-row style="margin: 12px 0px">
-          <el-row > <span class="dialog-hover">是否推荐</span></el-row>
-          <el-switch
-              v-model="data.isTop"
-              active-color="#13ce66"
-              inactive-color="#ff4949">
-          </el-switch>
+          <span class="dialog-hover">模型简介</span>
+          <el-input
+              type="textarea"
+              :autosize="{ minRows: 2, maxRows: 4}"
+              placeholder="简介"
+              v-model="data.detail">
+          </el-input>
+          <el-row style="margin: 12px 0px">
+            <span class="dialog-hover">配置模型单位</span>
+            <input class="dialog-input" v-model="data.unit" placeholder="配置模型单位" />
+          </el-row>
+          <el-row style="margin: 12px 0px">
+            <span class="dialog-hover">用户模型符号</span>
+            <input class="dialog-input" v-model="data.symbol" placeholder="用户模型符号" />
+          </el-row>
+          <el-row style="margin: 12px 0px">
+            <span class="dialog-hover">正常范围</span>
+            <template>
+              <div >
+                <el-input-number
+                    v-model="valuesRange[0]"
+                    :min="Number(valuesRange[0])"
+                    :max="Number(valuesRange[1])"
+                    :step="0.01"
+                    controls-position="right"
+                    placeholder="最小值"
+                    style="width: 150px; margin-right: 10px;"
+                ></el-input-number>
+                <el-input-number
+                    v-model="valuesRange[1]"
+                    :min="Number(valuesRange[0])"
+                    :max="Number(valuesRange[1])"
+                    :step="0.01"
+                    controls-position="right"
+                    placeholder="最大值"
+                    style="width: 150px; margin-left: 10px;"
+                ></el-input-number>
+                <el-slider
+                    v-model="valuesRange"
+                    :min="0"
+                    :max="100"
+                    :step="0.01"
+                    show-tooltip
+                    range
+                    show-input
+                ></el-slider>
+              </div>
+            </template>
+          </el-row>
         </el-row>
-        <el-row>
-          <Editor :receive-content="data.content" @on-receive="onReceiveContent" />
-        </el-row>
+
       </div>
       <span slot="footer" class="dialog-footer">
                 <el-button size="small" v-if="!isOperation" style="background-color: rgb(43, 121, 203);border: none;"
@@ -117,10 +141,7 @@
 </template>
 
 <script>
-import Editor from "@/components/Editor";
-
 export default {
-  components: { Editor },
   data() {
     return {
       data: { cover:''},
@@ -134,9 +155,9 @@ export default {
       value: true,
       selectedRows: [],
       status: null,
-      newsQueryDto: {}, // 搜索条件
+      healthModelConfigQueryDto: {}, // 搜索条件
       messsageContent: '',
-      tagsList: []
+      valuesRange: [0,0]
 
 
     };
@@ -154,26 +175,15 @@ export default {
   },
   created() {
     this.fetchFreshData();
-    this.loadAllTags();
   },
   methods: {
-    onReceiveContent(html) {
-      this.data.content=html;
-    },
-    loadAllTags(){
-      this.$axios.post('/tags/query',{}).then(response => {
-        const { data } = response;
-        if (data.code === 200) {
-          this.tagsList = data.data;
-        }
-      })
-    },
+
     handleAvatarSuccess(res, file) {
       if (res.code !== 200) {
-        this.$message.error(`资讯封面上传异常`);
+        this.$message.error(`健康模型封面上传异常`);
         return;
       }
-      this.$message.success(`资讯封面上传成功`);
+      this.$message.success(`健康模型封面上传成功`);
       this.data.cover = res.data;
     },
     // 多选框选中
@@ -187,14 +197,14 @@ export default {
         return;
       }
       const confirmed = await this.$swalConfirm({
-        title: '删除咨询数据',
+        title: '删除健康模型数据',
         text: `删除后不可恢复，是否继续？`,
         icon: 'warning',
       });
       if (confirmed) {
         try {
           let ids = this.selectedRows.map(entity => entity.id);
-          const response = await this.$axios.post(`/news/batchDelete`, ids);
+          const response = await this.$axios.post(`/healthModelConfig/batchDelete`, ids);
           if (response.data.code === 200) {
             this.$swal.fire({
               title: '删除提示',
@@ -214,21 +224,22 @@ export default {
             showConfirmButton: false,
             timer: 2000,
           });
-          console.error(`咨询信息删除异常：`, e);
+          console.error(`健康模型信息删除异常：`, e);
         }
       }
     },
     resetQueryCondition() {
-      this.newsQueryDto = {};
+      this.healthModelConfigQueryDto = {};
       this.searchTime = [];
       this.fetchFreshData();
     },
     // 修改信息
     async updateOperation() {
       try {
-        const response = await this.$axios.put('/news/update', this.data);
+        this.data.valueRange=this.valuesRange.join(',')
+        const response = await this.$axios.put('/healthModelConfig/update', this.data);
         this.$swal.fire({
-          title: '咨询信息修改',
+          title: '健康模型信息修改',
           text: response.data.msg,
           icon: response.data.code === 200 ? 'success' : 'error',
           showConfirmButton: false,
@@ -247,7 +258,8 @@ export default {
     // 信息新增
     async addOperation() {
       try {
-        const response = await this.$axios.post('/news/save', this.data);
+        this.data.valueRange=this.valuesRange.join(',')
+        const response = await this.$axios.post('/healthModelConfig/save', this.data);
         this.$message[response.data.code === 200 ? 'success' : 'error'](response.data.msg);
         if (response.data.code === 200) {
           this.closeDialog();
@@ -281,14 +293,14 @@ export default {
           size: this.pageSize,
           startTime: startTime,
           endTime: endTime,
-          ...this.newsQueryDto
+          ...this.healthModelConfigQueryDto
         };
-        const response = await this.$axios.post('/news/query', params);
+        const response = await this.$axios.post('/healthModelConfig/query', params);
         const { data } = response;
         this.tableData = data.data;
         this.totalItems = data.total;
       } catch (error) {
-        console.error('查询咨询信息异常:', error);
+        console.error('查询健康模型信息异常:', error);
       }
     },
     add() {
@@ -312,6 +324,7 @@ export default {
       this.fetchFreshData();
     },
     handleEdit(row) {
+      this.valuesRange = row.valueRange.split(',');
       this.dialogUserOperaion = true;
       this.isOperation = true;
       row.userPwd = null;

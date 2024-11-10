@@ -65,6 +65,13 @@ const routes = [
         meta: { requireAuth: true },
       },
       {
+        path: "/healthModelConfigManage",
+        name: '健康模型管理',
+        icon: 'el-icon-files',
+        component: () => import(`@/views/admin/HealthModelConfigManage.vue`),
+        meta: { requireAuth: true },
+      },
+      {
         path: "/evaluationsManage",
         name: '评论管理',
         icon: 'el-icon-chat-round',
